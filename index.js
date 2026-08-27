@@ -23,7 +23,14 @@ app.use("/api", addressRoutes);
 app.use("/api/payment", paymentRoutes);
 
 
-app.listen(3003, () => {
-    console.log("Server Running on port 3003");
-});
+// app.listen(3003, () => {
+//     console.log("Server Running on port 3003");
+// });
 
+
+
+const PORT = process.env.PORT || 3003;
+
+app.listen(PORT, () => {
+  console.log(`Server Running on port ${PORT}`);
+});
