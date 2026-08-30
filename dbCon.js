@@ -22,7 +22,6 @@
 // module.exports = db;
 // module.exports.getConnection = getConnection;
 
-
 const mysql = require("mysql2");
 
 const db = mysql.createPool({
@@ -45,5 +44,7 @@ const getConnection = async () => {
     return db.promise();
 };
 
-module.exports = db;
-module.exports.getConnection = getConnection;
+module.exports = {
+    db,
+    getConnection,
+};
