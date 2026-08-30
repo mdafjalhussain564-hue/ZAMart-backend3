@@ -1,5 +1,5 @@
 
-const db = require("../dbCon");
+const {db} = require("../dbCon");
 
 // ================= CREATE ORDER =================
 

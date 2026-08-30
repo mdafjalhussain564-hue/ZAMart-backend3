@@ -1,4 +1,4 @@
-const db = require("../dbCon");
+const {db }= require("../dbCon");
 
 // ================= ADD TO CART =================
 const addToCart = async (req, res) => {
