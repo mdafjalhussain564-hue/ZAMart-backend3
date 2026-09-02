@@ -1,4 +1,5 @@
 const Razorpay = require("razorpay");
+const db = require("../dbCon");
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
