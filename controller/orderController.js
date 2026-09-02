@@ -292,3 +292,70 @@ module.exports = {
 };
 
 
+// ================= ADMIN: GET ALL ORDERS =================
+
+const getAllOrdersAdmin = (req, res) => {
+  const sql = `
+    SELECT
+      orders.id AS order_id,
+      orders.user_id,
+
+      orders.delivery_name,
+      orders.delivery_mobile,
+      orders.delivery_address,
+      orders.delivery_city,
+      orders.delivery_state,
+      orders.delivery_pincode,
+
+      orders.total_amount,
+      orders.status,
+
+      orders.payment_status,
+      orders.payment_method,
+      orders.payment_id,
+
+      orders.created_at,
+
+      order_items.product_id,
+      order_items.quantity,
+      order_items.price,
+
+      product.product_name,
+      product.image
+
+    FROM orders
+
+    INNER JOIN order_items
+      ON orders.id = order_items.order_id
+
+    INNER JOIN product
+      ON order_items.product_id = product.id
+
+    ORDER BY orders.created_at DESC
+  `;
+
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.error("Admin Get Orders Error:", err);
+
+      return res.status(500).json({
+        message: "Orders fetch failed",
+        error: err.message,
+      });
+    }
+
+    res.status(200).json({
+      message: "All orders fetched successfully",
+      orders: result,
+    });
+  });
+};
+
+
+
+module.exports = {
+  createOrder,
+  getOrders,
+  getOrderById,
+  getAllOrdersAdmin,
+};

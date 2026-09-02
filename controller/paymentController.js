@@ -41,17 +41,77 @@ const createPaymentOrder = async (req, res) => {
 
 const crypto = require("crypto");
 
+// const verifyPayment = async (req, res) => {
+//   try {
+//     console.log("VERIFY BODY:", req.body);
+
+//     const {
+//       razorpay_order_id,
+//       razorpay_payment_id,
+//       razorpay_signature,
+//     } = req.body;
+
+//     if (
+//       !razorpay_order_id ||
+//       !razorpay_payment_id ||
+//       !razorpay_signature
+//     ) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Payment details missing",
+//       });
+//     }
+
+//     const body =
+//       razorpay_order_id + "|" + razorpay_payment_id;
+
+//     const expectedSignature = crypto
+//       .createHmac(
+//         "sha256",
+//         process.env.RAZORPAY_KEY_SECRET
+//       )
+//       .update(body)
+//       .digest("hex");
+
+//     console.log("EXPECTED SIGNATURE:", expectedSignature);
+//     console.log("RAZORPAY SIGNATURE:", razorpay_signature);
+
+//     if (expectedSignature === razorpay_signature) {
+//       return res.status(200).json({
+//         success: true,
+//         message: "Payment verified successfully",
+//       });
+//     }
+
+//     return res.status(400).json({
+//       success: false,
+//       message: "Invalid payment signature",
+//     });
+
+//   } catch (error) {
+//     console.error("VERIFY ERROR:", error);
+
+//     return res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
+
 const verifyPayment = async (req, res) => {
   try {
     console.log("VERIFY BODY:", req.body);
 
     const {
+      order_id,
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
     } = req.body;
 
     if (
+      !order_id ||
       !razorpay_order_id ||
       !razorpay_payment_id ||
       !razorpay_signature
@@ -62,6 +122,7 @@ const verifyPayment = async (req, res) => {
       });
     }
 
+    // Razorpay signature verify
     const body =
       razorpay_order_id + "|" + razorpay_payment_id;
 
@@ -76,17 +137,58 @@ const verifyPayment = async (req, res) => {
     console.log("EXPECTED SIGNATURE:", expectedSignature);
     console.log("RAZORPAY SIGNATURE:", razorpay_signature);
 
-    if (expectedSignature === razorpay_signature) {
-      return res.status(200).json({
-        success: true,
-        message: "Payment verified successfully",
+    if (expectedSignature !== razorpay_signature) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid payment signature",
       });
     }
 
-    return res.status(400).json({
-      success: false,
-      message: "Invalid payment signature",
-    });
+    // Payment successful → Database update
+    const updateSql = `
+      UPDATE orders
+      SET
+        payment_status = ?,
+        payment_method = ?,
+        payment_id = ?
+      WHERE id = ?
+    `;
+
+    db.query(
+      updateSql,
+      [
+        "paid",
+        "Razorpay",
+        razorpay_payment_id,
+        order_id,
+      ],
+      (err, result) => {
+        if (err) {
+          console.error("Payment DB Update Error:", err);
+
+          return res.status(500).json({
+            success: false,
+            message: "Payment verified but order update failed",
+            error: err.message,
+          });
+        }
+
+        if (result.affectedRows === 0) {
+          return res.status(404).json({
+            success: false,
+            message: "Order not found",
+          });
+        }
+
+        return res.status(200).json({
+          success: true,
+          message: "Payment verified and order updated successfully",
+          payment_status: "paid",
+          payment_method: "Razorpay",
+          payment_id: razorpay_payment_id,
+        });
+      }
+    );
 
   } catch (error) {
     console.error("VERIFY ERROR:", error);

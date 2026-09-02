@@ -1,10 +1,10 @@
-const {db} = require("../dbCon");
+const { db } = require("../dbCon");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const registerAdmin = async (req, res) => {
     try {
-        const { name, email, password} = req.body;
+        const { name, email, password } = req.body;
 
         if (!name || !email || !password) {
             return res.status(400).json({
@@ -57,7 +57,7 @@ const registerAdmin = async (req, res) => {
                             id: result.insertId,
                             name,
                             email,
-                           
+
                         }
                     });
                 }
@@ -101,6 +101,11 @@ const loginAdmin = async (req, res) => {
                     message: "Database error"
                 });
             }
+
+
+            console.log("LOGIN EMAIL:", email);
+            console.log("ADMIN FOUND:", result.length);
+
 
             // Admin not found
             if (result.length === 0) {
