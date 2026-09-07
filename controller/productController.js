@@ -29,12 +29,20 @@ module.exports = {
                 description,
                 mrp,
                 price,
-                image,
                 rating,
                 brand,
                 category,
                 visible,
             } = req.body;
+
+            if (!req.file) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Product image is required"
+                });
+            }
+
+            const image = `/uploads/${req.file.filename}`;
 
             const [result] = await Connection.execute(
                 `INSERT INTO product
