@@ -42,7 +42,7 @@ module.exports = {
                 });
             }
 
-            const image = `/uploads/${req.file.filename}`;
+            const image = req.file.path;
 
             const [result] = await Connection.execute(
                 `INSERT INTO product
@@ -73,7 +73,6 @@ module.exports = {
             });
         }
     },
-
     updateproductservice: async (req, res) => {
         const Connection = await getConnection();
 
@@ -85,27 +84,31 @@ module.exports = {
                 description,
                 mrp,
                 price,
-                image,
                 rating,
                 brand,
                 category,
                 visible
             } = req.body;
 
+            // New image upload hui hai to uska filename lo
+            const image = req.file
+                ? req.file.path
+                : req.body.image;
+
             const sql = `
-      UPDATE product
-      SET
-        product_name = ?,
-        description = ?,
-        mrp = ?,
-        price = ?,
-        image = ?,
-        rating = ?,
-        brand = ?,
-        category = ?,
-        visible = ?
-      WHERE id = ?
-    `;
+            UPDATE product
+            SET
+                product_name = ?,
+                description = ?,
+                mrp = ?,
+                price = ?,
+                image = ?,
+                rating = ?,
+                brand = ?,
+                category = ?,
+                visible = ?
+            WHERE id = ?
+        `;
 
             const [result] = await Connection.execute(sql, [
                 product_name,

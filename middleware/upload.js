@@ -1,35 +1,21 @@
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("../config/cloudinary");
 
-// middleware folder se ek level bahar jaakar uploads
-const uploadDir = path.join(__dirname, "..", "uploads");
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
 
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, uploadDir);
+    params: {
+        folder: "products",
+        allowed_formats: ["jpg", "jpeg", "png", "webp"],
     },
-
-    filename: function (req, file, cb) {
-        const uniqueName =
-            Date.now() + "-" + Math.round(Math.random() * 1E9);
-
-        cb(
-            null,
-            uniqueName + path.extname(file.originalname)
-        );
-    }
 });
 
 const fileFilter = (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|webp/;
 
     const extName = allowedTypes.test(
-        path.extname(file.originalname).toLowerCase()
+        file.originalname.toLowerCase()
     );
 
     const mimeType = allowedTypes.test(file.mimetype);
@@ -43,10 +29,12 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({
     storage: storage,
+
     fileFilter: fileFilter,
+
     limits: {
-        fileSize: 5 * 1024 * 1024
-    }
+        fileSize: 5 * 1024 * 1024,
+    },
 });
 
 module.exports = upload;
