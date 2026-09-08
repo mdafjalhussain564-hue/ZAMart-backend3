@@ -20,6 +20,9 @@ module.exports = {
     },
 
 
+
+
+
     insproductservice: async (req, res) => {
         const Connection = await getConnection();
 
@@ -44,6 +47,10 @@ module.exports = {
                     message: "Product image is required"
                 });
             }
+
+            console.log("BODY:", req.body);
+            console.log("FILE:", req.file);
+            console.log("IMAGE:", req.file?.path);
 
             const image = req.file.path;
 
@@ -80,7 +87,8 @@ module.exports = {
                 message: error.message,
             });
         }
-    },
+    }
+},
 
     updateproductservice: async (req, res) => {
         const Connection = await getConnection();
@@ -146,99 +154,99 @@ module.exports = {
         }
     },
 
-    deleteproductservice: async (req, res) => {
-        const Connection = await getConnection();
-
-        try {
-            const { id } = req.params;
-
-            const [result] = await Connection.execute(
-                "DELETE FROM product WHERE id = ?",
-                [id]
-            );
-
-            return res.status(200).json({
-                success: true,
-                message: "Product deleted successfully",
-                data: result
-            });
-
-        } catch (error) {
-            return res.status(500).json({
-                success: false,
-                message: error.message
-            });
-        }
-    },
-
-
-    getsingleproductservice: async (req, res) => {
-        try {
+        deleteproductservice: async (req, res) => {
             const Connection = await getConnection();
 
-            const { id } = req.params;
+            try {
+                const { id } = req.params;
 
-            const [rows] = await Connection.execute(
-                "SELECT * FROM product WHERE id = ?",
-                [id]
-            );
+                const [result] = await Connection.execute(
+                    "DELETE FROM product WHERE id = ?",
+                    [id]
+                );
 
-            if (rows.length === 0) {
-                return res.status(404).json({
+                return res.status(200).json({
+                    success: true,
+                    message: "Product deleted successfully",
+                    data: result
+                });
+
+            } catch (error) {
+                return res.status(500).json({
                     success: false,
-                    message: "Product not found",
+                    message: error.message
                 });
             }
-
-            return res.status(200).json({
-                success: true,
-                data: rows[0],
-            });
-
-        } catch (error) {
-            console.error("Get Single Product Error:", error);
-
-            return res.status(500).json({
-                success: false,
-                message: error.message,
-            });
-        }
-    },
+        },
 
 
+            getsingleproductservice: async (req, res) => {
+                try {
+                    const Connection = await getConnection();
+
+                    const { id } = req.params;
+
+                    const [rows] = await Connection.execute(
+                        "SELECT * FROM product WHERE id = ?",
+                        [id]
+                    );
+
+                    if (rows.length === 0) {
+                        return res.status(404).json({
+                            success: false,
+                            message: "Product not found",
+                        });
+                    }
+
+                    return res.status(200).json({
+                        success: true,
+                        data: rows[0],
+                    });
+
+                } catch (error) {
+                    console.error("Get Single Product Error:", error);
+
+                    return res.status(500).json({
+                        success: false,
+                        message: error.message,
+                    });
+                }
+            },
 
 
 
 
-    getcategoryproductservice: async (req, res) => {
-        const Connection = await getConnection();
 
-        try {
 
-            const { category } = req.params;
+                getcategoryproductservice: async (req, res) => {
+                    const Connection = await getConnection();
 
-            const [rows] = await Connection.execute(
-                `SELECT * FROM product
+                    try {
+
+                        const { category } = req.params;
+
+                        const [rows] = await Connection.execute(
+                            `SELECT * FROM product
                  WHERE category = ?
                  AND visible = 1`,
-                [category]
-            );
+                            [category]
+                        );
 
-            return res.status(200).json({
-                success: true,
-                message: "Category products get successfully",
-                data: rows
-            });
+                        return res.status(200).json({
+                            success: true,
+                            message: "Category products get successfully",
+                            data: rows
+                        });
 
-        } catch (error) {
+                    } catch (error) {
 
-            return res.status(500).json({
-                success: false,
-                message: error.message
-            });
+                        return res.status(500).json({
+                            success: false,
+                            message: error.message
+                        });
 
-        }
-    }
+                    }
+                }
 
 }
 
