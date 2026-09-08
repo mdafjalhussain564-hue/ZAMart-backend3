@@ -24,6 +24,9 @@ module.exports = {
         const Connection = await getConnection();
 
         try {
+            console.log("BODY:", req.body);
+            console.log("FILE:", req.file);
+
             const {
                 product_name,
                 description,
@@ -42,14 +45,14 @@ module.exports = {
                 });
             }
 
-            console.log("FILE:", req.file);
-
             const image = req.file.path;
+
+            console.log("IMAGE URL:", image);
 
             const [result] = await Connection.execute(
                 `INSERT INTO product
-      (product_name, description, mrp, price, image, rating, brand, category, visible)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            (product_name, description, mrp, price, image, rating, brand, category, visible)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
                     product_name,
                     description,
@@ -68,13 +71,17 @@ module.exports = {
                 message: "Product inserted successfully",
                 data: result,
             });
+
         } catch (error) {
+            console.error("PRODUCT INSERT ERROR:", error);
+
             return res.status(500).json({
                 success: false,
                 message: error.message,
             });
         }
     },
+    
     updateproductservice: async (req, res) => {
         const Connection = await getConnection();
 
