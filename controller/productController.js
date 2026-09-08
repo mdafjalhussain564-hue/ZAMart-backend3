@@ -81,7 +81,7 @@ module.exports = {
             });
         }
     },
-    
+
     updateproductservice: async (req, res) => {
         const Connection = await getConnection();
 
