@@ -20,15 +20,26 @@ module.exports = {
     },
 
 
-
-
-
     insproductservice: async (req, res) => {
         const Connection = await getConnection();
 
         try {
+            console.log("========== ADD PRODUCT ==========");
             console.log("BODY:", req.body);
             console.log("FILE:", req.file);
+
+            if (!req.file) {
+                console.log("FILE NOT FOUND");
+
+                return res.status(400).json({
+                    success: false,
+                    message: "Product image is required"
+                });
+            }
+
+            const image = req.file.path;
+
+            console.log("CLOUDINARY IMAGE:", image);
 
             const {
                 product_name,
@@ -40,21 +51,6 @@ module.exports = {
                 category,
                 visible,
             } = req.body;
-
-            if (!req.file) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Product image is required"
-                });
-            }
-
-            console.log("BODY:", req.body);
-            console.log("FILE:", req.file);
-            console.log("IMAGE:", req.file?.path);
-
-            const image = req.file.path;
-
-            console.log("IMAGE URL:", image);
 
             const [result] = await Connection.execute(
                 `INSERT INTO product
@@ -73,6 +69,8 @@ module.exports = {
                 ]
             );
 
+            console.log("INSERT RESULT:", result);
+
             return res.status(201).json({
                 success: true,
                 message: "Product inserted successfully",
@@ -80,15 +78,18 @@ module.exports = {
             });
 
         } catch (error) {
-            console.error("PRODUCT INSERT ERROR:", error);
+
+            console.error("🔥 PRODUCT INSERT ERROR 🔥");
+            console.error(error);
+            console.error("MESSAGE:", error.message);
+            console.error("STACK:", error.stack);
 
             return res.status(500).json({
                 success: false,
                 message: error.message,
             });
         }
-    }
-},
+    },
 
     updateproductservice: async (req, res) => {
         const Connection = await getConnection();
@@ -154,99 +155,99 @@ module.exports = {
         }
     },
 
-        deleteproductservice: async (req, res) => {
+    deleteproductservice: async (req, res) => {
+        const Connection = await getConnection();
+
+        try {
+            const { id } = req.params;
+
+            const [result] = await Connection.execute(
+                "DELETE FROM product WHERE id = ?",
+                [id]
+            );
+
+            return res.status(200).json({
+                success: true,
+                message: "Product deleted successfully",
+                data: result
+            });
+
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    },
+
+
+    getsingleproductservice: async (req, res) => {
+        try {
             const Connection = await getConnection();
 
-            try {
-                const { id } = req.params;
+            const { id } = req.params;
 
-                const [result] = await Connection.execute(
-                    "DELETE FROM product WHERE id = ?",
-                    [id]
-                );
+            const [rows] = await Connection.execute(
+                "SELECT * FROM product WHERE id = ?",
+                [id]
+            );
 
-                return res.status(200).json({
-                    success: true,
-                    message: "Product deleted successfully",
-                    data: result
-                });
-
-            } catch (error) {
-                return res.status(500).json({
+            if (rows.length === 0) {
+                return res.status(404).json({
                     success: false,
-                    message: error.message
+                    message: "Product not found",
                 });
             }
-        },
 
+            return res.status(200).json({
+                success: true,
+                data: rows[0],
+            });
 
-            getsingleproductservice: async (req, res) => {
-                try {
-                    const Connection = await getConnection();
+        } catch (error) {
+            console.error("Get Single Product Error:", error);
 
-                    const { id } = req.params;
-
-                    const [rows] = await Connection.execute(
-                        "SELECT * FROM product WHERE id = ?",
-                        [id]
-                    );
-
-                    if (rows.length === 0) {
-                        return res.status(404).json({
-                            success: false,
-                            message: "Product not found",
-                        });
-                    }
-
-                    return res.status(200).json({
-                        success: true,
-                        data: rows[0],
-                    });
-
-                } catch (error) {
-                    console.error("Get Single Product Error:", error);
-
-                    return res.status(500).json({
-                        success: false,
-                        message: error.message,
-                    });
-                }
-            },
+            return res.status(500).json({
+                success: false,
+                message: error.message,
+            });
+        }
+    },
 
 
 
 
 
 
-                getcategoryproductservice: async (req, res) => {
-                    const Connection = await getConnection();
+    getcategoryproductservice: async (req, res) => {
+        const Connection = await getConnection();
 
-                    try {
+        try {
 
-                        const { category } = req.params;
+            const { category } = req.params;
 
-                        const [rows] = await Connection.execute(
-                            `SELECT * FROM product
+            const [rows] = await Connection.execute(
+                `SELECT * FROM product
                  WHERE category = ?
                  AND visible = 1`,
-                            [category]
-                        );
+                [category]
+            );
 
-                        return res.status(200).json({
-                            success: true,
-                            message: "Category products get successfully",
-                            data: rows
-                        });
+            return res.status(200).json({
+                success: true,
+                message: "Category products get successfully",
+                data: rows
+            });
 
-                    } catch (error) {
+        } catch (error) {
 
-                        return res.status(500).json({
-                            success: false,
-                            message: error.message
-                        });
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
 
-                    }
-                }
+        }
+    }
 
 }
 
