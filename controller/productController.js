@@ -42,6 +42,8 @@ module.exports = {
                 });
             }
 
+            console.log("FILE:", req.file);
+
             const image = req.file.path;
 
             const [result] = await Connection.execute(
