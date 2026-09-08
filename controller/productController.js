@@ -20,76 +20,75 @@ module.exports = {
     },
 
 
-    insproductservice: async (req, res) => {
-        const Connection = await getConnection();
+  insproductservice: async (req, res) => {
+    const Connection = await getConnection();
 
-        try {
-            console.log("========== ADD PRODUCT ==========");
-            console.log("BODY:", req.body);
-            console.log("FILE:", req.file);
+    try {
+        console.log("========== ADD PRODUCT ==========");
+        console.log("BODY:", req.body);
+        console.log("FILE:", req.file);
 
-            if (!req.file) {
-                console.log("FILE NOT FOUND");
+        if (!req.file) {
+            console.log("❌ FILE NOT FOUND");
 
-                return res.status(400).json({
-                    success: false,
-                    message: "Product image is required"
-                });
-            }
+            return res.status(400).json({
+                success: false,
+                message: "Product image is required"
+            });
+        }
 
-            const image = req.file.path;
+        const image = req.file.path;
 
-            console.log("CLOUDINARY IMAGE:", image);
+        console.log("✅ CLOUDINARY IMAGE:", image);
 
-            const {
+        const {
+            product_name,
+            description,
+            mrp,
+            price,
+            rating,
+            brand,
+            category,
+            visible,
+        } = req.body;
+
+        const [result] = await Connection.execute(
+            `INSERT INTO product
+            (product_name, description, mrp, price, image, rating, brand, category, visible)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
                 product_name,
                 description,
                 mrp,
                 price,
+                image,
                 rating,
                 brand,
                 category,
                 visible,
-            } = req.body;
+            ]
+        );
 
-            const [result] = await Connection.execute(
-                `INSERT INTO product
-            (product_name, description, mrp, price, image, rating, brand, category, visible)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [
-                    product_name,
-                    description,
-                    mrp,
-                    price,
-                    image,
-                    rating,
-                    brand,
-                    category,
-                    visible,
-                ]
-            );
+        console.log("✅ INSERT RESULT:", result);
 
-            console.log("INSERT RESULT:", result);
+        return res.status(201).json({
+            success: true,
+            message: "Product inserted successfully",
+            data: result,
+        });
 
-            return res.status(201).json({
-                success: true,
-                message: "Product inserted successfully",
-                data: result,
-            });
+    } catch (error) {
 
-        } catch (error) {
+        console.error("🔥 PRODUCT INSERT ERROR 🔥");
+        console.error("MESSAGE:", error.message);
+        console.error("STACK:", error.stack);
 
-            console.error("🔥 PRODUCT INSERT ERROR 🔥");
-            console.error(error);
-            console.error("MESSAGE:", error.message);
-            console.error("STACK:", error.stack);
-
-            return res.status(500).json({
-                success: false,
-                message: error.message,
-            });
-        }
-    },
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+},
 
     updateproductservice: async (req, res) => {
         const Connection = await getConnection();

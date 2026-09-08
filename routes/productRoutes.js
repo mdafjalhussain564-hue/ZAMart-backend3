@@ -17,18 +17,33 @@ router.get("/getproduct/:id", getsingleproductservice);
 
 router.post(
     "/product",
+
     (req, res, next) => {
         console.log("🔥 PRODUCT ROUTE HIT 🔥");
         next();
     },
+
     upload.single("image"),
+
     (req, res, next) => {
         console.log("🔥 MULTER COMPLETE 🔥");
         console.log("FILE:", req.file);
         console.log("BODY:", req.body);
         next();
     },
-    insproductservice
+
+    insproductservice,
+
+    (err, req, res, next) => {
+        console.error("🔥 UPLOAD ERROR 🔥");
+        console.error("MESSAGE:", err.message);
+        console.error("FULL ERROR:", err);
+
+        return res.status(500).json({
+            success: false,
+            message: err.message
+        });
+    }
 );
 
 router.put(
