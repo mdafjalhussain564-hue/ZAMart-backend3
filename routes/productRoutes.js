@@ -17,7 +17,17 @@ router.get("/getproduct/:id", getsingleproductservice);
 
 router.post(
     "/product",
+    (req, res, next) => {
+        console.log("🔥 PRODUCT ROUTE HIT 🔥");
+        next();
+    },
     upload.single("image"),
+    (req, res, next) => {
+        console.log("🔥 MULTER COMPLETE 🔥");
+        console.log("FILE:", req.file);
+        console.log("BODY:", req.body);
+        next();
+    },
     insproductservice
 );
 
